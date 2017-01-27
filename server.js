@@ -22,7 +22,7 @@ app.get('/todos', function (req, res){
 // GET /todos/:id
 app.get('/todos/:id', function (req, res){
 	var todoId = parseInt(req.params.id, 10);
-	var matchedTodo = _.findwhere(todos, {id: todoID});
+	var matchedTodo = _.findWhere(todos, {id: todoId});
 
 	if (matchedTodo) {
 		res.json(matchedTodo);
@@ -38,7 +38,17 @@ app.get('/todos/:id', function (req, res){
 // POST - send the json object along with request to server to store in todo list
 
 app.post('/todos', function (req, res){
-	var body = req.body;
+	//var body = req.body; // Use _.pick to only pick description and completed
+	var body = _.pick(req.body, 'description', 'completed');
+
+
+	if (!_.isBoolean(body.completed) || _.isString(body.description) || body.description.trim().length === 0) {
+
+		return res.status(400).send90;
+	}
+
+	// set body.description to be trimmed value
+	body.description = body.description.trim();
 
 	//add id field
 	body.id = todoNextId++;
