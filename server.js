@@ -13,33 +13,22 @@ app.get('/', function (req, res) {
 	res.send('Todo API Root');
 });
 
-// GET /todos
-app.get('/todos', function (req, res) {
-	res.json(todos);
-});
-
 // GET /todos?completed=true
-app.get('/todos', function (req, res){
+app.get('/todos', function (req, res) {
 	var queryParams = req.query;
 	var filteredTodos = todos;
 
-	
-	// if has property && complted === 'true'
-	// call filteredTodos = _.where(filteredTodos, ?)
-	// else if has prop && completed if 'false'
-
-	 if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true'){
-	 	filteredTodos  = _.where(filteredTodos, {completed: true});
-	 } else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false'){
-		filteredTodos  = _.where(filteredTodos, {completed: false});
+	if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'true') {
+		filteredTodos = _.where(filteredTodos, {completed: true});
+	} else if (queryParams.hasOwnProperty('completed') && queryParams.completed === 'false') {
+		filteredTodos = _.where(filteredTodos, {completed: false});
 	}
 
 	res.json(filteredTodos);
-
 });
 
 // GET /todos/:id
-app.get('/todos/:id', function (req, res) {	
+app.get('/todos/:id', function (req, res) {
 	var todoId = parseInt(req.params.id, 10);
 	var matchedTodo = _.findWhere(todos, {id: todoId});
 
@@ -79,39 +68,31 @@ app.delete('/todos/:id', function (req, res) {
 	}
 });
 
-// PUT /todo/:id
-app.put('/todo/:id', function(req, res){
+// PUT /todos/:id
+app.put('/todos/:id', function (req, res) {
 	var todoId = parseInt(req.params.id, 10);
 	var matchedTodo = _.findWhere(todos, {id: todoId});
 	var body = _.pick(req.body, 'description', 'completed');
 	var validAttributes = {};
 
-	if(!matchedTodo){
+	if (!matchedTodo) {
 		return res.status(404).send();
 	}
 
-	if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)){
+	if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
 		validAttributes.completed = body.completed;
 	} else if (body.hasOwnProperty('completed')) {
-		//Bad
 		return res.status(400).send();
+	}
 
-	} 
-
-	if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0 ){
+	if (body.hasOwnProperty('description') && _.isString(body.description) && body.description.trim().length > 0) {
 		validAttributes.description = body.description;
 	} else if (body.hasOwnProperty('description')) {
-		//Bad
 		return res.status(400).send();
+	}
 
-	} 
-
-	// Update the data using _extent references the matchedTodo so the commented 
-	//line can be written by the below file
-		//matchedTodo = _.extend(matchedTodo, validAttributes);
-		_.extend(matchedTodo, validAttributes);
-		res.json(matchedTodo);
-
+	_.extend(matchedTodo, validAttributes);
+	res.json(matchedTodo);
 });
 
 app.listen(PORT, function () {
