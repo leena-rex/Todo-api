@@ -2,6 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var _ = require('underscore');
 var db = require('./db.js');
+var bcrypt = require('bcryptjs');
 
 var app = express();
 var PORT = process.env.PORT || 3000;
@@ -137,7 +138,7 @@ app.post('/users', function(req, res) {
 
 	// call create on db.todo
 	// respond wiht 200 and todo
-	// else cathe (e) and pass it to res.json(e)
+	// else cathe (e) and pass it to res.son(e)
 
 	db.user.create(body).then (function (user){
 		res.json(user.toPublicJSON());
@@ -147,6 +148,34 @@ app.post('/users', function(req, res) {
 	}	
 
 });
+
+// POST /users/login
+app.post('/users/login', function(req, res) {
+	var body = _.pick(req.body, 'email', 'password');
+
+	if ( typeof body.email !== 'string' || typeof body.password !== 'string' ) {
+		return res.status(400).send();
+
+	} 
+
+	db.user.findOne({
+		where: {
+			email: body.email
+		}
+	}).then (function (user) {		
+
+		if (!user || bcrypt.compareSync(body.password, user.get('password_hash'))) {
+			return res.status(401).send();
+		}
+
+		res.json(user.toPublicJSON());
+
+	}), function (e) {
+		res.status(500).send();
+	};
+
+	res.json(body);
+ });
 
 db.sequelize.sync({force: true}).then(function() {
 	app.listen(PORT, function() {
